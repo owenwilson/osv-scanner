@@ -26,7 +26,13 @@ docker-compose -f osc-scanner.yml up -d
 ```
 
 ```sh
-docker-compose -f osv-scanner.yml exec -T osv-scanneri-tool osv-scanner $(ImageName):$(ImageTag)
+docker-compose -f osv-scanner.yml exec -T osv-scanner-tool osv-scanner $(ImageName):$(ImageTag)
+```
+
+- Example
+
+```sh
+docker-compose -f osv-scanner.yml exec -T osv-scanner-tool osv-scanner --docker ubuntu:22.04 --format markdown > index.md
 ```
 
 ## DevOps
