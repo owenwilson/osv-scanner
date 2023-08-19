@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reporte de Vulnerabilidades</title>
+  <!-- Agregar los enlaces a Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container-fluid">
+    <h1 class="text-center mt-4">Reporte de Vulnerabilidades</h1>
+    
+    <div class="mb-3">
+      <label for="busqueda" class="form-label">Buscar:</label>
+      <input type="text" class="form-control" id="busqueda" oninput="filtrarTabla()">
+    </div>
+    <button class="btn btn-primary mb-3" onclick="descargarPDF()">Descargar como PDF</button>    
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>Nombre del Paquete</th>
+            <th>Versión</th>
+            <th>Severidad</th>
+            <th>Resumen</th>
+            <th>Afectado</th>
+            <th>Paquete</th>
+            <th>Ecosistema</th>
+            <th>URL del Paquete</th>
+            <th>Solución</th>
+            <th>Referencias</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpoTabla">
+          <!-- Los datos se insertarán aquí -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Agregar enlaces a Bootstrap 5 JS (opcional si necesita funcionalidades de Bootstrap) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    fetch('report.json')
+      .then(response => response.json())
+      .then(data => {
+        const cuerpoTabla = document.querySelector('#cuerpoTabla');
+        data.results.forEach(result => {
+          result.packages.forEach(pkg => {
+            pkg.vulnerabilities.forEach(vuln => {
+              const fila = document.createElement('tr');
+              fila.innerHTML = `
+                <td>${pkg.package.name}</td>
+                <td>${pkg.package.version}</td>
+                <td>${vuln.severity[0].type}</td>
+                <td>${vuln.summary}</td>
+                <td>${vuln.affected[0].versions.join(', ')}</td>
+                <td>${pkg.package.name}</td>
+                <td>${pkg.package.ecosystem}</td>
+                <td>${pkg.package.purl}</td>
+                <td>${vuln.affected[0].ranges[0].events[1].fixed}</td>
+                <td>${vuln.references.map(ref => `<a href="${ref.url}" target="_blank">${ref.url}</a>`).join('<br>')}</td>
+              `;
+              cuerpoTabla.appendChild(fila);
+            });
+          });
+        });
+      })
+      .catch(error => console.error(error));
+
+    function filtrarTabla() {
+      const textoBusqueda = document.getElementById('busqueda').value.toLowerCase();
+      const filas = document.querySelectorAll('#cuerpoTabla tr');
+      filas.forEach(fila => {
+        const infoPaquete = fila.querySelector('td:nth-child(1)').textContent.toLowerCase();
+        const version = fila.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        const severidad = fila.querySelector('td:nth-child(3)').textContent.toLowerCase();
+        const resumen = fila.querySelector('td:nth-child(4)').textContent.toLowerCase();
+        const afectado = fila.querySelector('td:nth-child(5)').textContent.toLowerCase();
+        const paquete = fila.querySelector('td:nth-child(6)').textContent.toLowerCase();
+        const ecosistema = fila.querySelector('td:nth-child(7)').textContent.toLowerCase();
+        const urlPaquete = fila.querySelector('td:nth-child(8)').textContent.toLowerCase();
+        const solucion = fila.querySelector('td:nth-child(9)').textContent.toLowerCase();
+        const referencias = fila.querySelector('td:nth-child(10)').textContent.toLowerCase();
+        if (infoPaquete.includes(textoBusqueda) || version.includes(textoBusqueda) || severidad.includes(textoBusqueda) || 
+            resumen.includes(textoBusqueda) || afectado.includes(textoBusqueda) ||
+            paquete.includes(textoBusqueda) || ecosistema.includes(textoBusqueda) ||
+            urlPaquete.includes(textoBusqueda) || solucion.includes(textoBusqueda) || referencias.includes(textoBusqueda)) {
+          fila.style.display = '';
+        } else {
+          fila.style.display = 'none';
+        }
+      });
+    }
+    function descargarPDF() {
+      const pdf = new jsPDF();
+      pdf.autoTable({ html: '#cuerpoTabla' });
+      pdf.save('reporte_vulnerabilidades.pdf');
+    }
+  </script>
+  script>
+    // ... (código JavaScript sigue igual)
+
+    function descargarPDF() {
+      const pdf = new jsPDF();
+      pdf.autoTable({ html: '#cuerpoTabla' });
+      pdf.save('reporte_vulnerabilidades.pdf');
+    }
+  </script>
+</body>
+</html>
